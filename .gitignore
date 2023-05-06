@@ -1,2 +1,7 @@
+#directories
 venv/
 .vscode/
+
+
+#files
+metricbeabt-so-28042023.csv
