@@ -1,7 +1,8 @@
 #directories
 venv/
 .vscode/
-
+__pycache__/
 
 #files
 metricbeabt-so-28042023.csv
+*.sqlite3
