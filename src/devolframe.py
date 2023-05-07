@@ -5,15 +5,7 @@ import json
 import pandas as pd
 
 class Devolframe:
-    def __init__(self, csv='', block=25_000_000, new=False):
-        if new:
-            # cols = ['timestamp', 'host']
-            
-            frame = pd.DataFrame({'timestamp': [datetime.fromisoformat('2023-03-13T07:04:31.079')]})
-            d = df.from_pandas(frame, npartitions=1)
-            
-            self.dv = d
-            return
+    def __init__(self, csv='', block=25_000_000):
         converters = {
             '@timestamp':Devolframe.timeParser,
             'event':Devolframe.jsonParser,
@@ -41,15 +33,21 @@ class Devolframe:
         except:
             return self.getProp(targetProp, n)
         
-    def genNew(self):
-        # newDv = Devolframe(new=True)
-        # newDv.dv['timestamp'] = self.dv['@timestamp']
-        # newDv.dv['host'] = self.dv['host']['name']
-        # return newDv.dv.head(10)
+    def genCols(self):
+        cleanjson = lambda d, prop: d.get(prop) if isinstance(d, dict) else d if isinstance(d, (int, float)) else None if d == None else json.loads(d.replace('\'', '"')).get(prop)
         self.dv['timestamp'] = self.dv['@timestamp']
-        self.dv['host'] = self.dv['host']['name']
-        
-        return self.dv.head(10)['host']
+        self.dv['version'] = self.dv['@version']
+        self.dv['rehost'] = self.dv['host'].apply(lambda d: cleanjson(d, 'name'), meta=('name', 'str'))
+        self.dv['reevent'] = self.dv['event'].apply(lambda d: cleanjson(d, 'dataset'), meta=('dataset', 'str'))
+        self.dv['cores'] = self.dv['system'].apply(lambda d: cleanjson(cleanjson(d, 'cpu'), 'cores'), meta=('cores', 'int'))
+        self.dv['idle'] = self.dv['system'].apply(lambda d: cleanjson(cleanjson(cleanjson(d, 'cpu'), 'idle'), 'pct'), meta=('pct', 'float'))
+        self.dv['user'] = self.dv['system'].apply(lambda d: cleanjson(cleanjson(cleanjson(d, 'cpu'), 'user'), 'pct'), meta=('pct', 'float'))
+        self.dv['sys'] = self.dv['system'].apply(lambda d: cleanjson(cleanjson(cleanjson(d, 'cpu'), 'system'), 'pct'), meta=('pct', 'float'))
+        self.dv['out'] = self.dv['system'].apply(lambda d: cleanjson(cleanjson(cleanjson(d, 'network'), 'out'), 'bytes'), meta=('bytes', 'int'))
+        self.dv['in'] = self.dv['system'].apply(lambda d: cleanjson(cleanjson(cleanjson(d, 'network'), 'in'), 'bytes'), meta=('bytes', 'int'))
+        # self.dv.drop(columns=['@timestamp', '@version', 'host', 'event', 'system']).compute()
+        # mask = self.dv['out'].notnull()
+        return self.dv.head(10)#.loc[mask].compute()
         
     
     @staticmethod
