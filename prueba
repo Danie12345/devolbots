@@ -1,0 +1,29 @@
+import csv
+from datetime import datetime
+from prettytable import PrettyTable
+
+# crear la tabla
+table = PrettyTable()
+table.field_names = ["Timestamp", "Idle_pct", "User_pct", "System_pct"]
+
+# abrir el archivo de entrada
+with open('datos.csv', 'r') as infile:
+    # crear un objeto lector de CSV
+    reader = csv.reader(infile)
+
+    # procesar cada fila del archivo de entrada
+    for row in reader:
+        # obtener el valor de timestamp y convertirlo a un objeto datetime
+        timestamp = datetime.fromisoformat(row[1].replace("Z", "+00:00"))
+
+        # obtener los valores necesarios y convertirlos a su tipo correspondiente
+        cpu = eval(row[5])["cpu"]
+        idle_pct = cpu["idle"]["pct"]
+        user_pct = cpu["user"]["pct"]
+        system_pct = cpu["system"]["pct"]
+
+        # agregar los valores a la tabla
+        table.add_row([timestamp.strftime("%Y-%m-%d %H:%M:%S"), idle_pct, user_pct, system_pct])
+
+# imprimir la tabla
+print(table)
