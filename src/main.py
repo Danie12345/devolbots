@@ -8,16 +8,16 @@ from devolframe import Devolframe as dv
 
 
 if __name__ == '__main__':
-    print (1 if None else 0)
     # time taken to read data
     start_time = time.time()
-    data_frame = dv('metricbeabt-so-28042023.csv', block=25e6)
+    data_frame = dv(csv='metricbeabt-so-28042023.csv', block=25e6)
     end_time = time.time()
 
     print("Read with dask: ", (end_time-start_time), "seconds")
 
     # data
-    print (data_frame.findMissing('system', lambda k, v: type(k[v]) == 'object', targetProp='host', n = 8))
+    # print (data_frame.findMissing('system', lambda k, v: type(k[v]) == 'object', targetProp='host', n = 8))
+    print (data_frame.genNew())
     # print (data_frame.dv.head(10)['@timestamp'].apply(type))
     # print (data_frame.dv.head(10))
 
